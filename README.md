@@ -62,6 +62,7 @@ An intelligent teaching assistant that ingests lecture PDFs, builds a semantic v
 - Python 3.11 or higher
 - Groq API key (free tier available at [groq.com](https://groq.com))
 - Qdrant instance (Docker or cloud)
+- Ollama with embeddinggemma model for embeddings (download at [ollama.ai](https://ollama.ai))
 
 ### Run the Application
 
@@ -91,6 +92,7 @@ python src/main.py
 - 4GB+ RAM (8GB+ recommended)
 - GPU optional but recommended for faster embeddings
 - Qdrant instance (local Docker or cloud)
+- Ollama with embeddinggemma model for embeddings
 
 ### Setup Steps
 
@@ -125,14 +127,25 @@ python src/main.py
    # Create .env file
    echo GROQ_API_KEY=your_api_key_here > .env
    echo QDRANT_URL=http://localhost:6333 >> .env
+   echo OLLAMA_URL=http://localhost:11434 >> .env
    ```
 
-5. **Set up Qdrant (Docker)**
+5. **Set up Ollama with embeddinggemma model**
+   ```bash
+   # Install Ollama from https://ollama.ai, then pull Gemma
+   ollama pull embeddinggemma:300m
+   # Or for larger model: ollama pull qwen3-embedding:4b
+   
+   # Start Ollama server (default runs on http://localhost:11434)
+   ollama serve
+   ```
+
+6. **Set up Qdrant (Docker)**
    ```bash
    docker-compose -f docker/compose.yml up -d
    ```
 
-6. **Start the application**
+7. **Start the application**
    ```bash
    python src/main.py
    ```
@@ -168,7 +181,8 @@ PDF Input → Text Extraction → Embeddings → Vector Store → Query Processi
 - Robust error handling and retry logic for rate limits
 
 **🔢 Embedding Layer** (`src/embedding/`)
-- Text vectorization with semantic models
+- **Ollama-powered embeddings** using embeddinggemma:300m model (local, privacy-preserving)
+- Support for multiple embedding model sizes (300m, 4B, etc.)
 - Efficient batch processing
 - Cosine similarity-based retrieval
 
@@ -311,6 +325,10 @@ Create a `.env` file in the project root:
 # Groq API Configuration
 GROQ_API_KEY=your_groq_api_key_here
 
+# Ollama Configuration (for embeddings)
+OLLAMA_URL=http://localhost:11434
+OLLAMA_EMBEDDING_MODEL=embeddinggemma:300m
+
 # Qdrant Vector Database
 QDRANT_URL=http://localhost:6333
 QDRANT_API_KEY=optional_api_key
@@ -318,12 +336,17 @@ QDRANT_API_KEY=optional_api_key
 # Application Settings
 COLLECTION_NAME=TM_section_slides
 RETRIEVAL_TOP_K=5
-EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 LLM_MODEL=openai/gpt-oss-120b
 LLM_TEMPERATURE=0.2
 ```
 
 ### Key Configuration Points
+
+**Embedding Settings** (`src/embedding/embed.py`):
+- Model: `embeddinggemma:300m` or `qwen3-embedding:4b` (via Ollama)
+- Runs locally for privacy and cost-efficiency
+- Default Ollama endpoint: `http://localhost:11434`
+- Supports custom model sizes
 
 **Retrieval Settings** (`src/generation/generate.py`):
 - `top_k=5`: Number of relevant chunks to retrieve
@@ -356,7 +379,7 @@ PDF File → Convert to Images → VLM Processing → Semantic Descriptions → 
 
 ### 2. Chunking & Embedding
 ```
-Slides → Chunk Text → Generate Embeddings → Vector + Metadata → Storage
+Slides → Chunk Text → Send to Ollama → Generate Embeddings (embeddinggemma:300m) → Vector + Metadata → Storage
 ```
 
 ### 3. Retrieval
