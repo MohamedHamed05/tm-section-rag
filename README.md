@@ -412,7 +412,17 @@ uv build
 
 ### Adding New Lecture Materials
 
-1. Place PDF files in a dedicated directory
+**File Naming Convention:**
+PDF files should follow this naming pattern: `subject-name_section-number_section-name.pdf`
+
+Examples:
+- `textmining_01_Introduction.pdf`
+- `textmining_02_Case-Study.pdf`
+- `textmining_03_Parsing.pdf`
+
+This naming convention helps maintain consistent metadata extraction and enables proper slide organization and attribution.
+
+1. Place PDF files in a dedicated directory (following the naming convention above)
 2. Choose your extraction method and run the indexing script:
    ```bash
    # Using PyMuPDF (default, faster)
