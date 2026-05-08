@@ -48,9 +48,13 @@ An intelligent teaching assistant that ingests lecture PDFs, builds a semantic v
 
 ## Demo
 
+<div align="center">
+
 ![TM Section RAG Demo](assets/demo.gif)
 
 *Interactive demonstration of the semantic search and Q&A capabilities with lecture retrieval*
+
+</div>
 
 ## Quick Start
 
